@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Секретный Квест</title>
+  <!-- Подключаем анимацию конфетти для финала -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --accent: #f59e0b;
+      --text: #f8fafc;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: var(--bg-color); color: var(--text); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
+    
+    .card { background: var(--card-bg); border-radius: 16px; padding: 30px; max-width: 500px; width: 100%; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5); text-align: center; position: relative; overflow: hidden; }
+    h2 { margin-bottom: 15px; color: var(--accent); }
+    p { margin-bottom: 20px; color: #cbd5e1; line-height: 1.5; }
+
+    button { background: var(--accent); color: #000; font-weight: bold; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; transition: transform 0.1s, background 0.2s; font-size: 16px; margin: 5px; }
+    button:hover { transform: scale(1.05); background: #d97706; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .step { display: none; }
+    .step.active { display: block; }
+
+    /* ЭТАП 1: Пикачу */
+    #pikachu-area { height: 250px; position: relative; border: 2px dashed #334155; border-radius: 12px; overflow: hidden; margin-bottom: 15px; }
+    #pikachu { width: 80px; position: absolute; cursor: pointer; transition: all 0.2s ease; }
+
+    /* ЭТАП 2: Гача */
+    .gacha-card { width: 180px; height: 250px; border: 3px solid var(--accent); border-radius: 12px; margin: 15px auto; background: #0f172a; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 10px; }
+    .gacha-card img { width: 120px; height: 120px; object-fit: contain; }
+
+    /* ЭТАП 3: Коктейль */
+    .ingredients { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 15px; }
+    .ing-btn { background: #334155; color: white; font-weight: normal; font-size: 14px; }
+    .ing-btn.selected { background: #22c55e; color: black; }
+    #canvas-container { display: none; margin-top: 15px; }
+    canvas { border: 2px solid var(--accent); border-radius: 12px; background: #eab308; cursor: crosshair; touch-action: none; }
+
+    /* ЭТАП 4: Стрыкало */
+    .quiz-q { text-align: left; margin-bottom: 15px; background: #0f172a; padding: 12px; border-radius: 8px; }
+    .quiz-q label { display: block; margin: 5px 0; cursor: pointer; font-size: 14px; }
+  </style>
+</head>
+<body>
+
+<div class="card">
+
+  <!-- ЭТАП 1: ПИКАЧУ -->
+  <div id="step-1" class="step active">
+    <h2>Этап 1: Поймай Пикачу!</h2>
+    <p>Нажми на Пикачу 5 раз, чтобы поймать его.</p>
+    <div id="pikachu-area">
+      <img id="pikachu" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png" alt="Pikachu">
+    </div>
+    <p>Поймано: <span id="pika-count">0</span> / 5</p>
+  </div>
+
+  <!-- ЭТАП 2: ГАЧА -->
+  <div id="step-2" class="step">
+    <h2>Этап 2: Поке-Гача</h2>
+    <p>Испытай удачу! Испытай судьбу и выбей легендарную карточку.</p>
+    <div class="gacha-card" id="gacha-box">
+      <span style="font-size: 50px;">❓</span>
+    </div>
+    <button id="gacha-btn" onclick="spinGacha()">Крутить!</button>
+    <button id="gacha-next" style="display:none;" onclick="nextStep(3)">Дальше →</button>
+  </div>
+
+  <!-- ЭТАП 3: КОКТЕЙЛЬ -->
+  <div id="step-3" class="step">
+    <h2>Этап 3: Коктейль «Секс на пляже»</h2>
+    <p id="cocktail-desc">Собери правильные ингредиенты по порядку!</p>
+    
+    <div class="ingredients" id="ing-list">
+      <button class="ing-btn" onclick="addIng('Водка 4cl', this)">Водка 4cl</button>
+      <button class="ing-btn" onclick="addIng('Джин', this)">Джин</button>
+      <button class="ing-btn" onclick="addIng('Персиковый ликер 2cl', this)">Персиковая хуйня 2cl</button>
+      <button class="ing-btn" onclick="addIng('Лимонный сок 1cl', this)">Лимонный сок 1cl</button>
+      <button class="ing-btn" onclick="addIng('Пиво', this)">Пиво</button>
+      <button class="ing-btn" onclick="addIng('Апельсиновый сок', this)">Апельсиновый сок</button>
+      <button class="ing-btn" onclick="addIng('Шейкер', this)">Потрясти в шейкере</button>
+    </div>
+
+    <!-- Интерактивный холст для Гренадина -->
+    <div id="canvas-container">
+      <p style="color:#ef4444; font-weight:bold;">Нарисуй что-нибудь гренадином на коктейле:</p>
+      <canvas id="cocktailCanvas" width="250" height="250"></canvas><br>
+      <button onclick="clearCanvas()">Очистить</button>
+      <button onclick="nextStep(4)">Готово! Дальше →</button>
+    </div>
+  </div>
+
+  <!-- ЭТАП 4: СТРЫКАЛО -->
+  <div id="step-4" class="step">
+    <h2>Этап 4: Тест «Валентин Стрыкало»</h2>
+    <p>Ответь правильно на вопросы по песням!</p>
+    
+    <div class="quiz-q">
+      <strong>1. Чем пахнет в нашей кабине?</strong>
+      <label><input type="radio" name="q1" value="0"> Сакурой</label>
+      <label><input type="radio" name="q1" value="1"> Нашим летом</label>
+      <label><input type="radio" name="q1" value="2"> Бензином</label>
+    </div>
+
+    <div class="quiz-q">
+      <strong>2. Куда летит яхта, парус?</strong>
+      <label><input type="radio" name="q2" value="0"> В Минск</label>
+      <label><input type="radio" name="q2" value="1"> В Ялту</label>
+      <label><input type="radio" name="q2" value="2"> На геленджикский пляж</label>
+    </div>
+
+    <div class="quiz-q">
+      <strong>3. Сережа бьет женщин и детей, потому что он...</strong>
+      <label><input type="radio" name="q3" value="0"> Красавчик</label>
+      <label><input type="radio" name="q3" value="1"> Плохой человек</label>
+      <label><input type="radio" name="q3" value="2"> Дурак</label>
+    </div>
+
+    <button onclick="checkQuiz()">Проверить ответы</button>
+  </div>
+
+  <!-- ФИНАЛ -->
+  <div id="step-5" class="step">
+    <h2>🎉 Поздравляем! 🎉</h2>
+    <p>Ты успешно прошёл все испытания!</p>
+    <div style="background: #0f172a; padding: 20px; border-radius: 12px; margin-bottom: 15px;">
+      <p style="color: var(--accent); font-weight: bold; font-size: 18px;">Твой секретный подарок / сообщение:</p>
+      <p id="final-message">Здесь может быть ваш текст, ссылка на подарок или поздравление!</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // Переключение этапов
+  function nextStep(stepNum) {
+    document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+    document.getElementById(`step-${stepNum}`).classList.add('active');
+    if(stepNum === 5) {
+      confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+    }
+  }
+
+  // --- ЭТАП 1: ПИКАЧУ ---
+  let pikaClicks = 0;
+  const pika = document.getElementById('pikachu');
+  const pikaArea = document.getElementById('pikachu-area');
+
+  function movePikachu() {
+    const maxX = pikaArea.clientWidth - 80;
+    const maxY = pikaArea.clientHeight - 80;
+    const randomX = Math.floor(Math.random() * maxX);
+    const randomY = Math.floor(Math.random() * maxY);
+    pika.style.left = randomX + 'px';
+    pika.style.top = randomY + 'px';
+  }
+  movePikachu();
+
+  pika.addEventListener('click', () => {
+    pikaClicks++;
+    document.getElementById('pika-count').innerText = pikaClicks;
+    if (pikaClicks >= 5) {
+      alert('Ура! Пикачу пойман!');
+      nextStep(2);
+    } else {
+      movePikachu();
+    }
+  });
+
+  // --- ЭТАП 2: ГАЧА ---
+  const pokemons = [
+    { name: 'Псайдак', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/54.png' },
+    { name: 'Снорлакс', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/143.png' },
+    { name: 'Мьюту (Secret SSR!)', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/150.png' }
+  ];
+
+  function spinGacha() {
+    const btn = document.getElementById('gacha-btn');
+    btn.disabled = true;
+    const box = document.getElementById('gacha-box');
+    
+    let timer = setInterval(() => {
+      const rand = pokemons[Math.floor(Math.random() * pokemons.length)];
+      box.innerHTML = `<img src="${rand.img}"><p>${rand.name}</p>`;
+    }, 100);
+
+    setTimeout(() => {
+      clearInterval(timer);
+      const winner = pokemons[2]; // Всегда выпадает легендарный Мьюту в конце
+      box.innerHTML = `<img src="${winner.img}"><p style="color:var(--accent); font-weight:bold;">${winner.name}</p>`;
+      btn.style.display = 'none';
+      document.getElementById('gacha-next').style.display = 'inline-block';
+    }, 2000);
+  }
+
+  // --- ЭТАП 3: КОКТЕЙЛЬ ---
+  const recipe = ['Водка 4cl', 'Персиковый ликер 2cl', 'Лимонный сок 1cl', 'Апельсиновый сок', 'Шейкер'];
+  let currentStep = 0;
+
+  function addIng(name, btn) {
+    if (name === recipe[currentStep]) {
+      btn.classList.add('selected');
+      btn.onclick = null;
+      currentStep++;
+      if (currentStep === recipe.length) {
+        document.getElementById('ing-list').style.display = 'none';
+        document.getElementById('cocktail-desc').innerText = 'Коктейль смешан! Теперь укрась его:';
+        document.getElementById('canvas-container').style.display = 'block';
+        initCanvas();
+      }
+    } else {
+      alert('Упс! Не тот ингредиент или нарушен порядок. Попробуй еще раз!');
+    }
+  }
+
+  // Холст для рисования Гренадином
+  let canvas, ctx, drawing = false;
+  function initCanvas() {
+    canvas = document.getElementById('cocktailCanvas');
+    ctx = canvas.getContext('2d');
+    
+    // Рисуем фон бокала
+    ctx.fillStyle = "#f97316"; // цвет коктейля
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    function startDraw(e) { drawing = true; draw(e); }
+    function endDraw() { drawing = false; ctx.beginPath(); }
+    function draw(e) {
+      if(!drawing) return;
+      const rect = canvas.getBoundingClientRect();
+      const x = (e.clientX || e.touches[0].clientX) - rect.left;
+      const y = (e.clientY || e.touches[0].clientY) - rect.top;
+
+      ctx.lineWidth = 6;
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = '#991b1b'; // Цвет гренадина
+
+      ctx.lineTo(x, y);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+    }
+
+    canvas.addEventListener('mousedown', startDraw);
+    canvas.addEventListener('mouseup', endDraw);
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('touchstart', startDraw);
+    canvas.addEventListener('touchend', endDraw);
+    canvas.addEventListener('touchmove', draw);
+  }
+
+  function clearCanvas() {
+    ctx.fillStyle = "#f97316";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+
+  // --- ЭТАП 4: СТРЫКАЛО ---
+  function checkQuiz() {
+    const q1 = document.querySelector('input[name="q1"]:checked')?.value;
+    const q2 = document.querySelector('input[name="q2"]:checked')?.value;
+    const q3 = document.querySelector('input[name="q3"]:checked')?.value;
+
+    if (q1 === '1' && q2 === '1' && q3 === '0') {
+      alert('Все ответы верны! Переходим к финалу!');
+      nextStep(5);
+    } else {
+      alert('Кое-где ошибки! Переслушай альбомы и попробуй снова.');
+    }
+  }
+</script>
+
+</body>
+</html>
