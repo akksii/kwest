@@ -16,7 +16,7 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
     body { background-color: var(--bg); color: var(--text); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 15px; }
 
-    .card { background: var(--card-bg); border-radius: 20px; padding: 25px; max-width: 550px; width: 100%; box-shadow: 0 20px 30px rgba(0,0,0,0.6); text-align: center; position: relative; }
+    .card { background: var(--card-bg); border-radius: 20px; padding: 25px; max-width: 580px; width: 100%; box-shadow: 0 20px 30px rgba(0,0,0,0.6); text-align: center; position: relative; }
     h2 { margin-bottom: 15px; color: var(--accent); font-size: 22px; }
     p { margin-bottom: 15px; color: #cbd5e1; font-size: 15px; line-height: 1.4; }
 
@@ -27,25 +27,32 @@
     .step { display: none; }
     .step.active { display: block; }
 
-    /* --- ЭТАП 1: ПИКАЧУ --- */
-    #pika-arena { height: 280px; position: relative; border: 2px dashed #334155; border-radius: 14px; overflow: hidden; background: #020617; }
-    #pikachu { width: 75px; position: absolute; cursor: pointer; transition: top 0.3s ease, left 0.3s ease; }
+    /* --- ЭТАП 1: ЛЕТАЮЩИЙ ПИКАЧУ --- */
+    #pika-arena { height: 300px; position: relative; border: 2px dashed #334155; border-radius: 14px; overflow: hidden; background: #020617; }
+    #pikachu { width: 75px; position: absolute; cursor: pointer; z-index: 10; }
 
-    /* --- ЭТАП 2: ГАЧА --- */
-    .pack-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 15px; }
-    .pack-btn { background: #334155; border: 2px solid #475569; border-radius: 8px; padding: 10px 5px; color: white; cursor: pointer; font-size: 12px; }
-    .pack-btn:hover { border-color: var(--accent); }
-    .card-box { background: #020617; border: 2px solid #334155; border-radius: 12px; padding: 10px; margin-top: 15px; max-height: 200px; overflow-y: auto; }
+    /* --- ЭТАП 2: ТАКТИЛЬНЫЕ TCG КАРТОЧКИ --- */
+    .pack-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 15px; max-height: 220px; overflow-y: auto; padding: 5px; }
+    .pack-card-item { background: #0f172a; border: 2px solid #38bdf8; border-radius: 10px; padding: 10px; color: #f8fafc; font-weight: bold; cursor: pointer; text-align: center; font-size: 13px; transition: transform 0.2s; }
+    .pack-card-item:hover { transform: scale(1.02); border-color: var(--accent); }
+    
+    .card-box { background: #020617; border: 2px solid #334155; border-radius: 12px; padding: 10px; margin-top: 15px; max-height: 280px; overflow-y: auto; }
     .cards-flex { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
 
-    /* ТЕМПЛЕЙТЫ КАРТОЧЕК ПУКЕМОНОВ */
-    .poke-card { width: 90px; height: 130px; border-radius: 8px; padding: 6px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; font-size: 10px; font-weight: bold; position: relative; box-shadow: 0 4px 8px rgba(0,0,0,0.4); text-shadow: 0 1px 2px black; }
-    .poke-card img { width: 55px; height: 55px; object-fit: contain; }
-    .rarity-common { background: linear-gradient(135deg, #64748b, #334155); border: 2px solid #94a3b8; }
-    .rarity-rare { background: linear-gradient(135deg, #1e3a8a, #1e1b4b); border: 2px solid #60a5fa; color: #93c5fd; }
-    .rarity-ultra { background: linear-gradient(135deg, #b45309, #78350f); border: 2px solid #fde047; color: #fef08a; animation: glow 1.5s infinite alternate; }
-    .rarity-secret { background: linear-gradient(135deg, #831843, #4c1d95, #065f46); border: 2px solid #f43f5e; color: #fff; animation: rainbow 2s infinite linear; }
-    @keyframes glow { from { box-shadow: 0 0 5px #fde047; } to { box-shadow: 0 0 15px #fde047; } }
+    /* НАСТОЯЩИЙ ДИЗАЙН TCG КАРТОЧКИ (ПОКЕЛЛЕКТОР) */
+    .tcg-card { width: 100px; height: 145px; border-radius: 7px; padding: 5px; display: flex; flex-direction: column; justify-content: space-between; font-size: 8px; position: relative; box-shadow: 0 4px 8px rgba(0,0,0,0.6); background: #e2e8f0; color: #0f172a; border: 4px solid #cbd5e1; }
+    .tcg-header { display: flex; justify-content: space-between; font-weight: bold; font-size: 9px; }
+    .tcg-img-wrap { width: 100%; height: 60px; background: #fff; border: 1px solid #94a3b8; border-radius: 4px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+    .tcg-img-wrap img { width: 50px; height: 50px; object-fit: contain; }
+    .tcg-body { font-size: 7px; text-align: left; background: rgba(255,255,255,0.7); padding: 2px; border-radius: 3px; }
+    .tcg-footer { display: flex; justify-content: space-between; font-size: 7px; font-weight: bold; color: #475569; }
+
+    /* Редкости карт */
+    .tcg-common { border-color: #94a3b8; background: #f1f5f9; }
+    .tcg-rare { border-color: #3b82f6; background: #dbeafe; }
+    .tcg-ultra { border-color: #f59e0b; background: linear-gradient(135deg, #fef3c7, #fde047); }
+    .tcg-gold { border-color: #eab308; background: linear-gradient(135deg, #fef08a, #ca8a04); animation: goldGlow 2s infinite alternate; }
+    @keyframes goldGlow { from { box-shadow: 0 0 5px #eab308; } to { box-shadow: 0 0 12px #facc15; } }
 
     /* --- ЭТАП 3: КОКТЕЙЛЬ --- */
     .ing-grid { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-bottom: 15px; }
@@ -74,36 +81,36 @@
 
 <div class="card">
 
-  <!-- ЕТАП 1: ПИКАЧУ -->
+  <!-- ЭТАП 1: ПИКАЧУ -->
   <div id="step-1" class="step active">
     <h2>Этап 1: Поймай Пикачу!</h2>
-    <p>Кликай по Пикачу, чтобы поймать его!</p>
+    <p>Он постоянно летает по экрану! Нажми на него 5 раз.</p>
     <div id="pika-arena">
       <img id="pikachu" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png" alt="Pikachu">
     </div>
     <div id="pika-next-wrap" style="display:none; margin-top: 15px;">
-      <button onclick="nextStep(2)">Пикачу пойман! Дальше →</button>
+      <button onclick="nextStep(2)">Ура! Пикачу пойман! Дальше →</button>
     </div>
   </div>
 
-  <!-- ЕТАП 2: ГАЧА -->
+  <!-- ЭТАП 2: ГАЧА СЕТЫ -->
   <div id="step-2" class="step">
-    <h2>Этап 2: Выбери 5 Бустеров</h2>
-    <p>Открой 5 паков из 10. Все выбитые карты сохранятся в коробке ниже!</p>
+    <h2>Этап 2: Поке-Гача (TCG Сеты)</h2>
+    <p>Выбери <b>5 сетов из 10</b>. В каждом открывается по 10 настоящих карточек!</p>
     
     <div class="pack-grid" id="pack-container"></div>
     
-    <p id="pack-status">Осталось открыть: 5 паков</p>
+    <p id="pack-status" style="font-weight: bold; color: var(--accent);">Осталось выдать сетов: 5</p>
 
     <div class="card-box">
-      <p style="font-size: 12px; color: #94a3b8; margin-bottom: 8px;">📦 Твоя коллекция карт:</p>
+      <p style="font-size: 12px; color: #94a3b8; margin-bottom: 8px;">🎴 Твой Альбом TCG Карточек (<span id="card-count">0</span>):</p>
       <div class="cards-flex" id="my-cards"></div>
     </div>
 
-    <button id="gacha-next-btn" style="display:none; margin-top:15px;" onclick="nextStep(3)">Собрано! Идем дальше →</button>
+    <button id="gacha-next-btn" style="display:none; margin-top:15px;" onclick="nextStep(3)">Собрано 50 карт! Идем дальше →</button>
   </div>
 
-  <!-- ЕТАП 3: КОКТЕЙЛЬ -->
+  <!-- ЭТАП 3: КОКТЕЙЛЬ -->
   <div id="step-3" class="step">
     <h2>Этап 3: Бар «Секс на пляже»</h2>
     <p id="cocktail-hint">Собери правильный рецепт коктейля «Секс на пляже»!</p>
@@ -142,7 +149,7 @@
     </div>
   </div>
 
-  <!-- ЕТАП 4: СТРЫКАЛО -->
+  <!-- ЭТАП 4: СТРЫКАЛО -->
   <div id="step-4" class="step">
     <h2>Этап 4: Валентин Стрыкало</h2>
     <div class="page-indicator" id="stry-page-num">Страница 1 из 3</div>
@@ -167,73 +174,112 @@
     if(s === 5) confetti({ particleCount: 120, spread: 80 });
   }
 
-  // --- 1. ПИКАЧУ ---
-  let pikaSpeed = 400;
+  // --- 1. ПИКАЧУ ПОСТОЯННО ЛЕТАЕТ ---
   let pikaCount = 0;
   const pika = document.getElementById('pikachu');
   const arena = document.getElementById('pika-arena');
+  let posX = 10, posY = 10;
+  let vx = 3, vy = 3;
 
-  function movePika() {
+  function animatePikachu() {
+    if(pikaCount >= 5) return;
+
     const maxX = arena.clientWidth - 75;
     const maxY = arena.clientHeight - 75;
-    pika.style.left = Math.random() * maxX + 'px';
-    pika.style.top = Math.random() * maxY + 'px';
+
+    posX += vx;
+    posY += vy;
+
+    if (posX <= 0 || posX >= maxX) vx *= -1;
+    if (posY <= 0 || posY >= maxY) vy *= -1;
+
+    pika.style.left = posX + 'px';
+    pika.style.top = posY + 'px';
+
+    requestAnimationFrame(animatePikachu);
   }
-  movePika();
 
   pika.addEventListener('click', () => {
     pikaCount++;
-    pikaSpeed = Math.max(100, pikaSpeed - 60);
-    pika.style.transition = `all ${pikaSpeed / 1000}s ease`;
-    movePika();
+    // Увеличиваем скорость при клике
+    vx *= 1.3;
+    vy *= 1.3;
 
     if(pikaCount >= 5) {
+      pika.style.display = 'none';
       document.getElementById('pika-next-wrap').style.display = 'block';
     }
   });
 
-  // --- 2. ГАЧА ---
-  const allCards = [
-    { name: 'Pikachu', img: '25', rarity: 'rarity-common', tag: 'COMMON' },
-    { name: 'Psyduck', img: '54', rarity: 'rarity-common', tag: 'COMMON' },
-    { name: 'Gengar', img: '94', rarity: 'rarity-rare', tag: 'RARE' },
-    { name: 'Charizard', img: '6', rarity: 'rarity-ultra', tag: 'ULTRA RARE' },
-    { name: 'Mewtwo', img: '150', rarity: 'rarity-secret', tag: 'SECRET SSR' },
-    { name: 'Snorlax', img: '143', rarity: 'rarity-rare', tag: 'RARE' },
-    { name: 'Eevee', img: '133', rarity: 'rarity-common', tag: 'COMMON' },
-    { name: 'Rayquaza', img: '384', rarity: 'rarity-secret', tag: 'SECRET SSR' }
+  animatePikachu();
+
+  // --- 2. ГАЧА (10 ПОЛНОЦЕННЫХ КАРТ В СЕТЕ) ---
+  const sets = [
+    "Scarlet & Violet", "Crown Zenith", "Paldean Fates", "151 Special", 
+    "Obsidian Flames", "Lost Origin", "Evolving Skies", "Silver Tempest", 
+    "Brilliant Stars", "Chilling Reign"
   ];
 
-  let openedPacks = 0;
+  const pokemonList = [
+    { name: 'Pikachu', hp: 70, id: 25, atk: 'Iron Tail 30' },
+    { name: 'Charizard EX', hp: 330, id: 6, atk: 'Burning Dark 180' },
+    { name: 'Mewtwo', hp: 130, id: 150, atk: 'Psystrike 110' },
+    { name: 'Gengar', hp: 110, id: 94, atk: 'Shadow Ball 60' },
+    { name: 'Psyduck', hp: 60, id: 54, atk: 'Headache 20' },
+    { name: 'Snorlax', hp: 150, id: 143, atk: 'Body Slam 80' },
+    { name: 'Lucario', hp: 120, id: 448, atk: 'Aura Sphere 70' },
+    { name: 'Rayquaza EX', hp: 320, id: 384, atk: 'Dragon Pulse 210' },
+    { name: 'Eevee', hp: 60, id: 133, atk: 'Tackle 20' },
+    { name: 'Greninja EX', hp: 300, id: 658, atk: 'Water Shuriken 120' }
+  ];
+
+  let openedPacksCount = 0;
+  let totalCardsCount = 0;
   const packGrid = document.getElementById('pack-container');
 
-  for(let i = 1; i <= 10; i++) {
-    const btn = document.createElement('div');
-    btn.className = 'pack-btn';
-    btn.innerHTML = `📦 Пакетик #${i}`;
-    btn.onclick = () => openPack(btn);
-    packGrid.appendChild(btn);
-  }
+  sets.forEach((setName, idx) => {
+    const item = document.createElement('div');
+    item.className = 'pack-card-item';
+    item.innerHTML = `📦 ${setName}`;
+    item.onclick = () => openSet(item, setName);
+    packGrid.appendChild(item);
+  });
 
-  function openPack(btn) {
-    if(openedPacks >= 5) return;
-    btn.style.visibility = 'hidden';
-    openedPacks++;
-    document.getElementById('pack-status').innerText = `Осталось открыть: ${5 - openedPacks} паков`;
+  function openSet(itemEl, setName) {
+    if(openedPacksCount >= 5) return;
+    
+    itemEl.style.display = 'none';
+    openedPacksCount++;
+    document.getElementById('pack-status').innerText = `Осталось выдать сетов: ${5 - openedPacksCount}`;
 
-    // Выбиваем случайную карточку
-    const randCard = allCards[Math.floor(Math.random() * allCards.length)];
-    const cardEl = document.createElement('div');
-    cardEl.className = `poke-card ${randCard.rarity}`;
-    cardEl.innerHTML = `
-      <span>${randCard.tag}</span>
-      <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${randCard.img}.png">
-      <span>${randCard.name}</span>
-    `;
-    document.getElementById('my-cards').appendChild(cardEl);
+    // Генерируем 10 карточек из этого сета
+    for(let i = 0; i < 10; i++) {
+      totalCardsCount++;
+      const p = pokemonList[Math.floor(Math.random() * pokemonList.length)];
+      
+      let rarityClass = 'tcg-common';
+      let rarityTag = '♦ Common';
+      const randRarity = Math.random();
+      
+      if(randRarity > 0.85) { rarityClass = 'tcg-gold'; rarityTag = '★ GOLD Secret'; }
+      else if(randRarity > 0.6) { rarityClass = 'tcg-ultra'; rarityTag = '★ Ultra Rare'; }
+      else if(randRarity > 0.3) { rarityClass = 'tcg-rare'; rarityTag = '◆ Rare'; }
 
-    if(openedPacks === 5) {
-      document.getElementById('pack-status').innerText = '🎉 Все 5 паков открыты!';
+      const card = document.createElement('div');
+      card.className = `tcg-card ${rarityClass}`;
+      card.innerHTML = `
+        <div class="tcg-header"><span>${p.name}</span><span>HP ${p.hp}</span></div>
+        <div class="tcg-img-wrap"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${p.id}.png"></div>
+        <div class="tcg-body"><b>Atk:</b> ${p.atk}</div>
+        <div class="tcg-footer"><span>${setName}</span><span>${rarityTag}</span></div>
+      `;
+      document.getElementById('my-cards').appendChild(card);
+    }
+
+    document.getElementById('card-count').innerText = totalCardsCount;
+
+    if(openedPacksCount === 5) {
+      document.getElementById('pack-status').innerText = '🎉 Собрано 5 сетов (50 карточек)!';
       document.getElementById('gacha-next-btn').style.display = 'inline-block';
     }
   }
@@ -296,19 +342,16 @@
 
   // --- 4. СТРЫКАЛО ---
   const stryQuestions = [
-    // СТРАНИЦА 1
     [
       { q: "Я бью женщин и детей, потому что я красавчик...", a: "потому что я сильней и они не могут сдачи дать мне" },
       { q: "Ведь моё сердце холодное, словно лёд...", a: "ты не придешь а кто нибудь другой придет" },
       { q: "Я вылетаю на одну из местных автострад...", a: "плотный ряд машин двадцатка на бензин и я давлю на газ" }
     ],
-    // СТРАНИЦА 2
     [
       { q: "Прости мне мои расспросы, но это невыносимо...", a: "так быстро проходит осень так тянутся долго зимы" },
       { q: "Знаешь, Таня, не передать словами то...", a: "как я люблю тебя" },
       { q: "Таня, Таня, объясни...", a: "как набраться смелости" }
     ],
-    // СТРАНИЦА 3
     [
       { q: "Мы познакомились с тобой на дискотеке вроде...", a: "я приобнял тебя рукой и ты была не против" },
       { q: "Хоть я спокоен, но кажется мне, что я...", a: "я не достоин женщин вроде тебя" },
